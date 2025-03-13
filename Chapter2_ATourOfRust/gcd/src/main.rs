@@ -14,7 +14,7 @@ fn gcd(mut n: u64, mut m: u64) -> u64 {
     n
 }
 
-// To run main do: cargo run
+// To run main do: cargo run params, eg: cargo run 10 5 20 25 30
 fn main() {
     let mut numbers = Vec::new();
 
