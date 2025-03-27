@@ -5,6 +5,7 @@ use image::png::PngEncoder;
 use std::fs::File;
 use std::io;
 use std::env;
+use num_cpus;
 
 // To build: cargo build --release
 // To perform an integration test:  time target/release/mandelbrot mandel.png 4000x3000 -1.20,0.35 -1,0.20
@@ -131,7 +132,8 @@ fn main() {
 
     let mut pixels = vec![0; bounds.0 * bounds.1];
 
-    let threads = 8;
+    let threads = num_cpus::get(); // Obtain the number of cores in the system
+    println!("{} cpus detected", threads);
     let rows_per_band = bounds.1 / threads + 1;
 
     {
