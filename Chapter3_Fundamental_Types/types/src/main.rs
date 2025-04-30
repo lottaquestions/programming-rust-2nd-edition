@@ -6,6 +6,9 @@ fn build_vector() -> Vec<i16>{
     v.push(20);
     v
 }
+fn new_pixel_buffer(rows: usize, cols: usize) -> Vec<u8> {
+    vec![0; rows*cols]
+}
 
 fn main() {
 
@@ -148,5 +151,100 @@ fn main() {
     let b = Box::new(t);
     assert_eq!(*b, t);
     println!("{}, {}", b.deref().0, b.deref().1);
+
+    // Arrays
+    let lazy_caterer: [u32; 6] = [1, 2, 4, 7, 11, 16];
+    let taxonomy = ["Animalia", "Anthropoda", "Insecta"];
+    assert_eq!(lazy_caterer[3], 7);
+    assert_eq!(taxonomy.len(), 3);
+
+    let mut sieve = [true; 10000];
+    for i in 2..100 {
+        if sieve[i] {
+            let mut j = i * i;
+            while j < sieve.len() {
+                sieve[j] = false;
+                j += i;
+            }
+        }
+    }
+    println!("index 211: {}, index 9876: {}", sieve[211], sieve[9876]);
+    assert!(sieve[211]);
+    assert!(!sieve[9876]);
+
+    // Methods on arrays actually work on slices
+    let mut chaos = [3, 5, 4, 1, 2];
+    // sort method is actually defined on slices, but since it takes its 
+    // operand by reference, Rust implicitly produces a &mut [i32] slice 
+    // referring to the entire array and passes that to sort
+    chaos.sort();
+    assert_eq!(chaos, [1, 2, 3, 4, 5]);
+
+    // Vectors
+    // Simplest way to create a vector is using the vec! macro
+    let mut primes = vec![2, 3, 5, 7];
+    assert_eq!(primes.iter().product::<i32>(),210);
+    primes.push(11);
+    primes.push(13);
+    assert_eq!(primes.iter().product::<i32>(), 30030);
+
+    let mut vec_of_pixels = new_pixel_buffer(2,2);
+    vec_of_pixels[0] = 1;
+    assert_eq!(vec_of_pixels, vec![1, 0, 0, 0]);
+
+    // Starting off with a new empty vector
+    let mut pal = Vec::new();
+    pal.push("step");
+    pal.push("on");
+    pal.push("no");
+    pal.push("pets");
+    assert_eq!(pal, vec!["step", "on", "no", "pets"]);
+
+    // Building a vector on values produced by an iterator
+    let v: Vec<i32> = (0..5).collect(); // The type of the collect ie Vec<i32> must be supplied
+                                        // otherwise the collection produced is ambiguous, not
+                                        // necessarily a vector
+    assert_eq!(v, vec![0, 1, 2, 3, 4]);
+
+    // Slice methods such as reverse can be applied to vectors
+    let mut pal_vec = vec!["a man", "a plan", "a canal", "panama"];
+    pal_vec.reverse(); // reverse method is actually defined on slices, but the call 
+                       //implicitly borrows a &mut [&str] slice from the vector and invokes reverse on that.
+    assert_eq!(pal_vec, vec!["panama", "a canal", "a plan", "a man"]);
+
+    // len() gives the number of elements currently in a vector but
+    // capacity() gives the number of elements that a vector can hold
+    // without reallocation
+    let mut vec1 = Vec::with_capacity(2);
+    assert_eq!(vec1.len(), 0);
+    assert_eq!(vec1.capacity(), 2);
+
+    vec1.push(1);
+    vec1.push(2);
+    assert_eq!(vec1.len(), 2);
+    assert_eq!(vec1.capacity(), 2);
+
+    vec1.push(3);
+    println!("Capacity is now {}", vec1.capacity());
+
+    // Inserting and removing elements causes the elements that come
+    // after the inserted element to be shifted forwards or backwards,
+    // just like in C++
+    let mut vec2 = vec![10, 20, 30, 40, 50];
+
+    // Make the element at position 3 to be 35
+    vec2.insert(3, 35);
+    assert_eq!(vec2, vec![10, 20, 30, 35, 40, 50]);
+
+    // Remove the element at index 1
+    vec2.remove(1);
+    assert_eq!(vec2, vec![10, 30, 35, 40, 50]);
+
+    // Pop can be used to remove the last element in a vector. The pop
+    // returns Some(last_element)
+    let mut vec3 = vec!["Snow Puff", "Glass Gem"];
+    assert_eq!(vec3.pop(), Some("Glass Gem"));
+    assert_eq!(vec3.pop(), Some("Snow Puff"));
+    assert_eq!(vec3.pop(), None); // If we pop from an empty vector we get None
 
 }
