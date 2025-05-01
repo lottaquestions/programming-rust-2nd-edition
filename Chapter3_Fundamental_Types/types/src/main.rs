@@ -247,4 +247,99 @@ fn main() {
     assert_eq!(vec3.pop(), Some("Snow Puff"));
     assert_eq!(vec3.pop(), None); // If we pop from an empty vector we get None
 
+    // Slices
+    // Are non-owning references to consecutive values in memory
+    // Useful for writing functions that can operate on both vectors and arrays
+    // at the same time.
+    fn print(n: &[f64]) {
+        for elt in n {
+            println!("{}", elt);
+        }
+    }
+    let vec4: Vec<f64> = vec![0.0, 0.707, 1.0, 0.707];
+    let arr1: [f64; 4] = [0.0, -0.707, -1.0, -0.707];
+    let sv: &[f64] = &vec4;
+    let sa: &[f64] = &arr1;
+    print(sv);
+    print(sa);
+    print(&vec4);
+    print(&arr1);
+
+    // We can get references into slices of vectors, arrays or slices
+    // by indexing with a range. Not the last index in the range is exclusive
+    // not inclusive
+    println!("Slices obtained by indexing");
+    print(&vec4[0..2]); // Print the first 2 elements of vec4
+    println!("---");
+    print(&arr1[2..]); // Print elements of arr1 starting at index 2
+    println!("---");
+    print(&sv[1..3]); // print sv[1] and sv[2]
+    println!("---");
+
+    // String types
+    // String Literals
+    // Similar to C++ const char *.
+    // Enclosed in double quotes
+    let speech = "\"Ouch\" said the well.\n";
+    println!("{}",speech);
+
+    // Can span many lines
+    println!("Many times I ask,
+    why does it span 2 lines?");
+
+    // To not have a newline and weired spacing in a multi-line string literal
+    // succeed each line with \
+    println!("Multiline \
+    printing \
+    that just works!");
+
+    // Raw strings are preceded with an r, and backslashes and whitespaces in
+    // the raw strings are included as is
+    let default_win_install_path = r"c:\Program Files\Nowhere";
+    print!("{}\n", default_win_install_path);
+
+    // To include a double quote (") character in a raw string, mark, the
+    // start and end of the raw string with the pound (#) character
+    println!(r###"This raw string started with 'r###'.
+    Therefore it does not end until we reach a quote mark ('"')
+    followed immediately by three pound signs ('###')
+    "###);
+
+    // Byte strings
+    // A string literal with a b prefix that is a slice of u8 values rather than
+    // unicode.
+    // They can encode ASCII characters or \xHH escape sequences. They cannot contain
+    // arbritrary unicode values.
+    // Raw byte strings are prefixed with br
+    let method = b"GET";
+    assert_eq!(method, &[b'G', b'E', b'T']);
+
+    // Strings
+    // Store the characters as UTF-8, which is a variable width encoding
+    let noodles = "noodles".to_string(); // ASCII characters in string occupy 1 byte each
+    println!("{} is of len {} bytes", noodles, noodles.len()); // Len == 7
+    let oodles = &noodles[1..];
+    println!("{}", oodles);
+    let poodles = "ಠ_ಠ"; // Unicode charactars can occupy up to 2 bytes
+    println!("{} is of len {} bytes", poodles, poodles.len()); // Len == 7, 2 unicodes of size 3 and 1 ASCII
+    assert_eq!(poodles.len(), 7);
+    assert_eq!(poodles.chars().count(), 3);
+
+    // Strings can be created using the format macro
+    assert_eq!(format!("{}°{:02}′{:02}″N", 24, 5, 23), "24°05′23″N".to_string());
+
+    // Arrays, slices, and vectors of strings can create new strings using concat or join
+    let bits = vec!["oh", "bloody", "oh", "bladder"];
+    assert_eq!(bits.concat(), "ohbloodyohbladder");
+    assert_eq!(bits.join(", "), "oh, bloody, oh, bladder");
+
+    // Example operations supported by strings
+    assert!("ONE".to_lowercase() == "one");
+    assert!("peanut".contains("nut"));
+    assert_eq!("ಠ_ಠ".replace("ಠ", "■"), "■_■");
+    assert_eq!("    clean\n".trim(), "clean");
+    for word in "veni, vidi, vici".split(", ") {
+        assert!(word.starts_with("v"));
+    }
+
 }
