@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 
 fn print_padovan(){
     let mut padovan = vec![1,1,1]; // allocated here
@@ -139,5 +141,40 @@ fn main() {
     assert_eq!(composers[0].name, None);
     assert_eq!(composers[0].birth, 1525);
 
+    // Copy Types: The Exception to Moves
+
+    // The standard Copy types include all the machine integer and floating-point numeric types, the char and bool types, 
+    // and a few others. A tuple or fixed-size array of Copy types is itself a Copy type.
+    let num1 : i32 = 64;
+    let num2 = num1;
+    assert_eq!(num1, num2);
+
+    // By default user defined types are non-copy, however, if all the fields of a user-defined type are copy types,
+    // then the user-defined type can be transformed into a copy type with the below atttribute.
+    #[derive(Copy, Clone)]
+    struct Label { number: u32}
+
+    fn print_label( l: Label) { println!("STAMP: {}", l.number)}
+
+    let l = Label { number: 3 };
+    print_label(l); // l is copied into print_label instead of moved since its definition has attribute: #[derive(Copy, Clone)]
+    println!("My label number is {}", l.number); // l is still valid since it was never moved.
+
+
+    // Rc and Arc: Shared Ownership
+    // Rc - reference count. Is not thread-safe.
+    // Arc - atomic reference count. Used across multiple threads
+
+    let s : Rc<String> = Rc::new("shirataki".to_string());
+    let t = s.clone();
+    let u = s.clone();
+    assert_eq!(s, t);
+    assert_eq!(s, u);
+    println!("{}", s);
+
+    // You can use any of String’s usual methods directly on an Rc<String>
+    assert!(s.contains("shira"));
+    assert_eq!(s.find("taki"), Some(5));
+    println!("{} are quite chewy, almost bouncy, but lack flavor", u);
 
 }
