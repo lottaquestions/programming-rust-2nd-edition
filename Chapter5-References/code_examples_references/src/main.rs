@@ -49,6 +49,17 @@ fn reference_scenario(){
 
 }
 
+// Lifetimes and receiving references as function arguments
+static WORTH_POINTING_AT : i32 = 1000; 
+
+static  mut STASH: &i32 = &10;
+// This function will only accept parameters with static lifetime.
+fn static_stasher(p: &'static i32) {
+    unsafe {
+        STASH = p;
+    }
+}
+
 fn main() {
     moving_scenario();
     reference_scenario();
@@ -63,4 +74,52 @@ fn main() {
     *m += 32;
     assert!(*m == 64);
     assert!(*m == y);
+
+    // In Rust, the . operator implicitly dereferences its left operand, if needed
+    struct Anime { name: &'static str, bechdel_pass: bool }
+    let aria = Anime{ name: "Aria: The Animation", bechdel_pass: true};
+    let anime_ref = &aria;
+    assert_eq!(anime_ref.name, "Aria: The Animation");
+    assert_eq!(anime_ref.bechdel_pass, true);
+
+    // With explicit dereferencing, the equivalent would be:
+    assert_eq!((*anime_ref).name,"Aria: The Animation");
+
+    // dot (.) operator can also implicitly borrow a reference to its left operand
+    let mut v = vec![1973, 1968];
+    v.sort(); // implicitly borrows a mutable reference to v
+    (&mut v).sort(); // Equivalent to the above but more verbose.
+    assert_eq!(v[0], 1968);
+    println!("{:?}", v);
+
+    // References of references
+    struct Point { x: i32, y: i32}
+    let point = Point{x:1000, y:729};
+    let r_point = &point;
+    let rr_point = &r_point;
+    let rrr_point = &rr_point;
+    assert_eq!(rrr_point.x, 1000); // Rust automatically traversers 3 references to get to x
+    assert_eq!(rrr_point.y, 729); // Rust automatically traversers 3 references to get to y
+
+    // Comparing references
+    let x = 10;
+    let y = 10;
+
+    let rx = &x;
+    let ry = &y;
+    let rrx = &rx;
+    let rry = &ry;
+    assert_eq!(rrx, rry);
+    assert!( rrx == rry);             // The referents are equal
+    assert!(!std::ptr::eq(rrx, rry)); // but occupy different addresses.
+
+    fn factorial(n: usize) -> usize {
+        (1..n+1).product()
+    }
+    let r = &factorial(6);
+    // Arithmetic operators can see through one level of references
+    assert_eq!(r + &1009, 1729);
+
+
+    static_stasher(&WORTH_POINTING_AT);
 }
