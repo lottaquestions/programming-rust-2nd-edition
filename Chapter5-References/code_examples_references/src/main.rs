@@ -60,6 +60,17 @@ fn static_stasher(p: &'static i32) {
     }
 }
 
+// Example showing explicit adding of lifetime
+fn smallest<'a>(v: &'a [i32]) -> &'a i32 {
+    let mut s = &v[0];
+    for r in &v[1..] {
+        if *r < *s {
+            s = r;
+        }
+    }
+    s
+}
+
 fn main() {
     moving_scenario();
     reference_scenario();
@@ -121,5 +132,56 @@ fn main() {
     assert_eq!(r + &1009, 1729);
 
 
+    // This function expects a static lifetime for its parameter. 
+    // See its definition
     static_stasher(&WORTH_POINTING_AT);
+
+    {
+        // Use scoping to ensure lifetime of s matches that of parabola
+        let parabola = [9, 4, 1, 0, 1, 4, 9];
+        let s = smallest(&parabola);
+        assert_eq!(*s, 0);
+    }
+
+    // How to define separate lifetimes for each member of a struct of references
+    // Note that this is only for when the members are references.
+    struct S<'a, 'b>{
+        x: &'a i32,
+        y: &'b i32
+
+    }
+    // By haaving x and y with different lifetimes, we are able to write the code below:
+    let x = 10;
+    let r;
+    {
+        let y = 20;
+        {
+            let s = S { x: &x, y: &y};
+            r = s.x;
+            assert_eq!(s.y, &y);
+        }
+        assert_eq!(r, &x);
+    }
+
+    // Omitting Lifetime Parameters
+    struct  StringTable {
+        elements: Vec<String>,
+    }
+
+    impl  StringTable {
+        // In the method below, the Rust compiler deduces different lifetimes for 
+        // self and prefix, even though they are not explicitly given by the programmer.
+        fn find_by_prefix(&self, prefix: &str) -> Option<&String>{
+            for i in 0..self.elements.len() {
+                if self.elements[i].starts_with(prefix) {
+                    return  Some(&self.elements[i]);
+                }
+            }
+            None
+        }
+    }
+    let str_table = StringTable{ elements : vec!["random element in vec".to_string(), "not the random element".to_string()]};
+    let my_prefix = "random".to_string();
+    let found_elem = str_table.find_by_prefix(&my_prefix);
+    assert_eq!(found_elem.unwrap(), &str_table.elements[0]);
 }
