@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'adder'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=adder"
+                ],
+                "filter": {
+                    "name": "adder",
+                    "kind": "lib"
+                }
+            },
+            "program": "${workspaceFolder}/target/debug/deps/adder-89696b0864b9cc52",
+            "args": ["--test", "tests::larger_can_hold_smaller"],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false
+        }
+    ]
+}
