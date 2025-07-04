@@ -1,4 +1,5 @@
-use std::cmp::Ordering;
+use core::num;
+use std::{cmp::Ordering, vec};
 
 
 // Using the ordering enum from the standard library
@@ -146,6 +147,65 @@ fn test_balloon() {
     describe_balloon_location(ball1);
     describe_balloon_location(ball2);
 }
+
+// Pattern matching on slices.
+fn greet_people(names: &[String]) {
+    match names {
+        [] => println!("Hello nobody"),
+        [a] => println!("Hello, {a}."),
+        [a,b] => println!("Hello, {a} and {b}"),
+        [a, .., b] => println!("Hello, everyone from {a} to {b}"),
+    }
+}
+
+fn test_greet_people(){
+    let names:Vec<String> = vec!["Jack".to_string(), "Jill".to_string(), "Jasper".to_string(), "Jones".to_string()];
+    greet_people(&[]);
+    greet_people(&names[0..1]);
+    greet_people(&names[0..2]);
+    greet_people(&names[0..3]);
+    greet_people(&names[..]); // Take the whole vector as a slice. Slice patterns only work on slices and not vectors.
+                              // To pass in the whole vector, we pass it in as a slice.
+}
+
+fn at_end(input : Option<char>) -> bool {
+    // Here | acts like the | in a regular expression rather than a bitwise or
+    match input {
+        Some('\n' | '\r') | None => true,
+        _ => false,
+    }
+}
+
+// Matching multiple possibilities
+fn test_multiple_possibilities() {
+    assert_eq!(at_end(Some('\n')), true);
+    assert_eq!((at_end(Some('\r'))), true);
+    assert_eq!(at_end(None), true);
+    assert_eq!(at_end(Some('a')), false);
+}
+
+// Matching ranges
+fn bytes_converter(num_bytes: usize) -> String {
+    const KILO: usize = 1024;
+    const MEGA: usize = 1024 * KILO;
+    const GIGA: usize = 1024 * MEGA;
+
+    match num_bytes {
+        0..KILO => num_bytes.to_string(),
+        KILO..MEGA => format!("{}K", num_bytes/KILO),
+        MEGA..GIGA => format!("{}M", num_bytes/MEGA),
+        GIGA.. => "big".to_string(),
+        
+    }
+}
+
+fn test_bytes_converter() {
+    assert_eq!(bytes_converter(10), "10".to_string());
+    assert_eq!(bytes_converter(1024), "1K".to_string());
+    assert_eq!(bytes_converter(1024*1024*2), "2M".to_string());
+    assert_eq!(bytes_converter(1024*1024*24*1024), "big".to_string());
+}
+
 fn main() {
     test_ordering();
 
@@ -158,4 +218,7 @@ fn main() {
     test_binnary_tree();
     test_time();
     test_balloon();
+    test_greet_people();
+    test_multiple_possibilities();
+    test_bytes_converter();
 }
