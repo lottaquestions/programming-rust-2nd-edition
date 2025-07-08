@@ -62,13 +62,30 @@ struct TreeNode<T> {
     right : BinaryTree<T>
 }
 
+//T: Ord is added as a constraint to require T to be a type that implements the Ord trait. 
+// This enables the use of the comparison operator <= on object of the type.
+impl<T: Ord> BinaryTree<T> {
+    fn add(&mut self, value: T) {
+        let mut place = self;
+        while let BinaryTree::NonEmpty(node) = place {
+            if value < node.element {
+                place = &mut node.left;
+            } else {
+                place = &mut node.right;
+            }
+        }
+        *place = BinaryTree::NonEmpty(Box::new(TreeNode { element: value, left: BinaryTree::Empty, right: BinaryTree::Empty }));
+    }
+}
+
 fn test_binnary_tree(){
     use self::BinaryTree::*;
     let mercury_tree = NonEmpty(Box::new(TreeNode { element: "Mercury", left: Empty, right: Empty }));
     let jupiter_tree = NonEmpty(Box::new(TreeNode { element: "Jupiter", left: Empty, right: Empty }));
     let uranus_tree  = NonEmpty(Box::new(TreeNode { element: "Uranus", left: Empty, right: Empty }));
     let mars_tree = NonEmpty(Box::new(TreeNode { element: "Mars", left: jupiter_tree, right: mercury_tree }));
-    let tree = NonEmpty(Box::new(TreeNode { element: "Saturn", left: mars_tree, right: uranus_tree }));
+    let mut tree = NonEmpty(Box::new(TreeNode { element: "Saturn", left: mars_tree, right: uranus_tree }));
+    tree.add(&"Neptune");
     dbg!(tree);
 }
 
