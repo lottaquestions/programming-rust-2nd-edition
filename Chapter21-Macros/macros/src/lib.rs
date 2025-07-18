@@ -1,8 +1,10 @@
 #![recursion_limit = "256"]
-use std::collections::HashMap;
+pub use std::collections::HashMap;
+pub use std::boxed::Box;
+pub use std::string::ToString;
 
 #[derive(Clone, PartialEq, Debug)]
-enum Json {
+pub enum Json {
     Null,
     Boolean(bool),
     Number(f64),
@@ -51,6 +53,7 @@ macro_rules! impl_from_num_for_json {
 
 impl_from_num_for_json!(u8 i8 u16  i16 u32 i32 u64 i64 u128 i128 usize isize f32 f64);
 
+#[macro_export]
 macro_rules! json {
     (null) => {
         Json::Null
@@ -65,49 +68,24 @@ macro_rules! json {
     };
 }
 
-macro_rules! complain {
-    (msg : $msg:expr) => {
-        println!("Complaint filed {}", $msg)
+#[macro_export]
+macro_rules! json_v2 {
+    (null) => {
+        $crate::Json::Null
     };
-    (user : $userid:tt , msg : $msg:expr ) => {
-        println!("Complaint from user {} : {}", $userid, $msg)
+    ([ $( $element:tt ),* ]) => {
+        $crate::Json::Array(vec![ $( json_v2!($element)),*])
     };
-}
-
-fn test_complain_macro(){
-    complain!(user: "jimb", msg: "the AI lab's chatbots keep picking on me")
-}
-
-fn main() {
-    let width = 4.0;
-    let desc = json!({
-        "width": width,
-        "height": (width * 9.0 / 4.0)
-    });
-    println!("{:?}", desc);
-
-    test_complain_macro();
-}
-
-#[test]
-fn json_null() {
-    assert_eq!(json!(null), Json::Null);
-}
-
-#[test]
-fn json_array_with_json_element() {
-    let macro_generated_value = json!([
-        // Valid json
-        {
-            "pitch" : 440.0
-        }
-    ]);
-
-    let hand_coded_value = Json::Array(vec![Json::Object(Box::new(
-        vec![("pitch".to_string(), Json::Number(440.0))]
-            .into_iter()
-            .collect(),
-    ))]);
-
-    assert_eq!(macro_generated_value, hand_coded_value);
+    ( { $( $key:tt : $value:tt), *}) => {
+        let mut fields = $crate::macros::Box::new(
+            $crate::macros::HashMap::new()
+        );
+        $(
+            fields.insert($crate::macros::ToString::to_string($key), json_v2!($value));
+        )*
+        $crate::Json::Object(fields)
+    };
+    ($other:tt) => {
+        $crate::Json::from($other)
+    };
 }
